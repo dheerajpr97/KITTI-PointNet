@@ -1,41 +1,17 @@
 import copy
+import datetime
+import os
 import time
 
 import numpy as np
+import pandas as pd
 import torch
 from torch.utils.data import DataLoader
 
 from data.dataset_seg import PointCloudDataset, remap_labels
 from models.pointnet_seg import PointNetSeg, pointnet_loss
-import os
+from training.train_utils import EarlyStopping, calculate_accuracy, load_data
 
-class EarlyStopping:
-    def __init__(self, patience=5, verbose=False):
-        self.patience = patience
-        self.verbose = verbose
-        self.counter = 0
-        self.best_loss = float('inf')
-        self.early_stop = False
-        self.best_model_state = None
-
-    def step(self, val_loss, model):
-        if val_loss < self.best_loss:
-            self.best_loss = val_loss
-            self.best_model_state = copy.deepcopy(model.state_dict())
-            self.counter = 0
-        else:
-            self.counter += 1
-            if self.counter >= self.patience:
-                if self.verbose:
-                    print("Early stopping triggered")
-                self.early_stop = True
-
-def calculate_accuracy(outputs, labels):
-    _, predicted = torch.max(outputs, 2)
-    predicted = predicted.view(-1)
-    correct = (predicted == labels).sum().item()
-    total = labels.size(0)
-    return correct, total
 
 def train_one_epoch(model, dataloader, optimizer, device, reg_weight, label_mapping):
     model.train()
@@ -111,22 +87,17 @@ def train(model, train_dataloader, val_dataloader, optimizer, device, epochs=10,
     
     return model
 
-def load_data(path, num_points):
-    point_path = os.path.join(path, f'downsampled_points_{num_points}.npy')
-    label_path = os.path.join(path, f'downsampled_labels_{num_points}.npy')
-    points = np.load(point_path)
-    labels = np.load(label_path)
-    return points, labels
 
 def main(args):
-    # Load data
-
+    
+    # Hyperparameters 
     NUM_POINTS = args.num_points
     BATCH_SIZE = args.batch_size
     NUM_CLASSES = 15
 
-    train_points, train_labels = load_data(args.data_path + '/train', NUM_POINTS)   
-    val_points, val_labels = load_data(args.data_path + '/val', NUM_POINTS)
+    # Load data
+    train_points, train_labels = load_data(args.data_path + '/processed/train', NUM_POINTS)   
+    val_points, val_labels = load_data(args.data_path + '/processed/val', NUM_POINTS)
 
     TRAIN_DATASET = PointCloudDataset(train_points, train_labels)
     VAL_DATASET = PointCloudDataset(val_points, val_labels)
@@ -134,8 +105,9 @@ def main(args):
     train_dataloader = DataLoader(TRAIN_DATASET, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
     val_dataloader = DataLoader(VAL_DATASET, batch_size=16, shuffle=False, num_workers=4)
 
-    labels_all = train_labels.flatten()
-    labels_unique = np.unique(labels_all)
+    # Load the labels and create a label mapping
+    filtered_labels = pd.read_csv(args.data_path + '/filtered_labels.csv')
+    labels_unique = np.unique(filtered_labels['id'].values)
     label_mapping = {labels_unique: new_label for new_label, labels_unique in enumerate(labels_unique)}
 
 
@@ -143,8 +115,7 @@ def main(args):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     # Instantiate the model
-    num_classes = np.unique(train_labels).shape[0]  # Modify as per your data structure
-    model = PointNetSeg(num_class=num_classes).to(device)
+    model = PointNetSeg(num_class=NUM_CLASSES).to(device)
 
     # Define the optimizer and scheduler
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate)
@@ -154,6 +125,10 @@ def main(args):
     trained_model = train(model, train_dataloader, val_dataloader, optimizer, device=device,
                           epochs=args.epochs, reg_weight=args.reg_weight, scheduler=scheduler,
                           early_stopping_patience=args.early_stopping_patience, label_mapping=label_mapping)
+    
+    # Current timestamp
+    timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    args.save_model_path = args.save_model_path + timestamp + '.pt'
 
     # Save the trained model
     torch.save(trained_model.state_dict(), args.save_model_path)
@@ -162,7 +137,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Train a PointNetSeg model.")
-    parser.add_argument('--data_path', type=str, required=True, help='Path to training data')
+    parser.add_argument('--data_path', type=str, default='data', required=True, help='Path to training data')
     parser.add_argument('--num_points', type=int, default=256, help='Number of points to downsample to')
     parser.add_argument('--batch_size', type=int, default=32, help='Batch size for training and validation')
     parser.add_argument('--learning_rate', type=float, default=0.01, help='Learning rate')
@@ -171,9 +146,9 @@ if __name__ == "__main__":
     parser.add_argument('--epochs', type=int, default=1000, help='Number of epochs to train')
     parser.add_argument('--reg_weight', type=float, default=0.01, help='Regularization weight')
     parser.add_argument('--early_stopping_patience', type=int, default=250, help='Early stopping patience')
-    parser.add_argument('--save_model_path', type=str, default='trained_model.pth', help='Path to save the trained model')
+    parser.add_argument('--save_model_path', type=str, default='models/trained_models/trained_model_seg_', help='Path to save the trained model')
 
     args = parser.parse_args()
     main(args)
 
-# Example usage: python -m training.train_seg --data_path data/processed/ --batch_size 16 --learning_rate 0.01 --step_size 150 --gamma 0.5 --epochs 1000 --reg_weight 0.01 --early_stopping_patience 250
+# Example usage: python -m training.train_seg --data_path data --batch_size 32 --learning_rate 0.01 --step_size 150 --gamma 0.5 --epochs 1000 --reg_weight 0.01 --early_stopping_patience 250

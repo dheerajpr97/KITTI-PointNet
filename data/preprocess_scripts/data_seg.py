@@ -35,7 +35,10 @@ def main(args):
     print(f'Point clouds processed...')
 
     # Save the processed data
-    save_downsampled_data(sampled_points, sampled_labels, args.num_points, args.data_type, directory='data')
+    SAVE_DIR = os.path.join('data/processed', args.data_type)
+    if not os.path.exists(SAVE_DIR):
+        os.makedirs(SAVE_DIR)
+    save_downsampled_data(sampled_points, sampled_labels, args.num_points, args.data_type, directory=SAVE_DIR)
 
     # Add time taken to run the script
     end_time = time.time()
@@ -46,9 +49,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process point cloud data.')
     parser.add_argument('--data_type', type=str, required=True, choices=['train', 'val'], help='Specify "train" or "val" for the type of data to process')
     parser.add_argument('--num_points', type=int, default=256, help='Number of points to downsample to')
-    parser.add_argument('--train_file_path', type=str, help='Path to train file list')
-    parser.add_argument('--val_file_path', type=str, help='Path to validation file list')
-    parser.add_argument('--filtered_labels_path', type=str, required=True, help='Path to filtered labels CSV file')
+    parser.add_argument('--train_file_path', type=str, default='data/filepaths_train.txt', help='Path to train file list')
+    parser.add_argument('--val_file_path', type=str, default='data/filepaths_val.txt', help='Path to validation file list')
+    parser.add_argument('--filtered_labels_path', type=str, default='data/filtered_labels.csv', required=True, help='Path to filtered labels CSV file')
     args = parser.parse_args()
     main(args)
 

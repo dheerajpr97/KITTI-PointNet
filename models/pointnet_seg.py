@@ -2,10 +2,12 @@
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.nn.parallel
 import torch.utils.data
-import torch.nn.functional as F
+
 from models.pointnet_utils import PointNetEncoder
+
 
 class PointNetSeg(nn.Module):
     def __init__(self, num_class):
