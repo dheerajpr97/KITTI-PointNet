@@ -69,7 +69,8 @@ Appreciation to the creators of the PointNet architecture and its PyTorch implem
 
 ### To do:
 
-1) Add mIoU evaluation and inference scripts
-2) Add example visualizations
-3) Add PointNet++ functionality
-4) Compare performance of architectures
+* Add classification scripts 
+* Add mIoU evaluation and inference scripts
+* Add example visualizations
+* Add PointNet++ functionality
+* Compare performance of architectures
