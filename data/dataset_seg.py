@@ -4,11 +4,6 @@ from torch.utils.data import Dataset
 
 from utils.utils import normalize_point_cloud
 
-
-def remap_labels(labels, label_mapping):
-    remapped_labels = torch.tensor([label_mapping[label.item()] for label in labels])
-    return remapped_labels
-
 class PointCloudDataset(Dataset):
     def __init__(self, points, labels):
         self.points = points

@@ -4,6 +4,7 @@ import pandas as pd
 from utils.ply import read_ply
 from utils.utils import *
 import time
+from data.dataset_cls import PointCloudProcessorCls
 
 def main(args):
     # Add time taken to run the script
@@ -26,24 +27,20 @@ def main(args):
 
     else:
         raise ValueError("Invalid data_type specified. Choose 'train' or 'val'.")
-
+    
     # Process point clouds
     print(f'Processing point clouds started...')
-    sampled_points, sampled_labels =  downsample_point_cloud_chunks_seg(file_paths=file_paths[0:1],
-                                                                     trainid_to_keep=trainid_to_keep, 
-                                                                     chunk_size=1, num_samples=args.num_points)
+    pc_processor = PointCloudProcessorCls(num_points=args.num_points, trainid_to_keep=trainid_to_keep, 
+                                       num_chunks_per_class=10) 
+    sampled_points, sampled_labels = downsample_point_cloud_chunks_cls(file_paths, 
+                                                                       pc_processor)
     print(f'Point clouds processed...')
 
     # Save the processed data
     SAVE_DIR = os.path.join('data/processed', args.data_type)
     if not os.path.exists(SAVE_DIR):
         os.makedirs(SAVE_DIR)
-    save_downsampled_data(sampled_points, sampled_labels, args.task, args.num_points, args.data_type, directory=SAVE_DIR)
-
-    # Add time taken to run the script
-    end_time = time.time()
-    print(f"Time taken to run the script: {end_time - start_time:.2f} seconds")
-
+    save_downsampled_data(sampled_points, sampled_labels, args.num_points, args.task, args.data_type, directory=SAVE_DIR)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process point cloud data.')
@@ -57,4 +54,4 @@ if __name__ == '__main__':
     main(args)
 
 # Example usage command:
-# python -m data.preprocess_scripts.data_seg --task seg --data_type train --num_points 512 --train_file_path data/filepaths_train.txt --val_file_path data/filepaths_val.txt --filtered_labels_path data/filtered_labels.csv
+# python -m data.preprocess_scripts.data_cls --task cls --data_type val --num_points 512 --train_file_path data/filepaths_train.txt --val_file_path data/filepaths_val.txt --filtered_labels_path data/filtered_labels.csv

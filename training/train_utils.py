@@ -3,11 +3,12 @@ import os
 
 import numpy as np
 import torch
+from sklearn.utils.class_weight import compute_class_weight
 
 
-def load_data(path, num_points):
-    point_path = os.path.join(path, f'downsampled_points_{num_points}.npy')
-    label_path = os.path.join(path, f'downsampled_labels_{num_points}.npy')
+def load_data(path, task, num_points, data_type):
+    point_path = os.path.join(path, f'downsampled_points_{task}_{num_points}_{data_type}.npy')
+    label_path = os.path.join(path, f'downsampled_labels_{task}_{num_points}_{data_type}.npy')
     points = np.load(point_path)
     labels = np.load(label_path)
     return points, labels
@@ -48,3 +49,16 @@ def calculate_accuracy_cls(outputs, labels):
     total = labels.size(0)
     return correct, total
 
+
+
+def calculate_class_weights(labels):
+    # Calculate class distribution
+    unique, counts = np.unique(labels, return_counts=True)
+    class_distribution = dict(zip(unique, counts))
+
+    # Calculate class weights
+    classes = np.unique(labels)
+    class_weights = compute_class_weight(class_weight='balanced', classes=classes, y=labels)
+    class_weights_dict = {cls: weight for cls, weight in zip(classes, class_weights)}
+
+    return class_weights_dict

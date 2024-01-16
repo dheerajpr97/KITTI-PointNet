@@ -2,6 +2,7 @@ import os
 
 import numpy as np
 import pandas as pd
+import torch
 
 from utils.ply import read_ply
 
@@ -160,7 +161,7 @@ def create_point_arrays_from_filtered(filtered_points):
     return point_arrays
 
 
-def downsample_point_cloud_chunks(file_paths, trainid_to_keep, chunk_size=1, num_samples=256):
+def downsample_point_cloud_chunks_seg(file_paths, trainid_to_keep, chunk_size=1, num_samples=256):
     """
     Process point cloud data in chunks.
 
@@ -190,8 +191,35 @@ def downsample_point_cloud_chunks(file_paths, trainid_to_keep, chunk_size=1, num
     
     return sampled_points, sampled_labels
 
+def downsample_point_cloud_chunks_cls(file_paths, pc_processor, chunk_size=1):
+    """
+    Processes point clouds from file paths and collects chunks and labels.
 
-def save_downsampled_data(downsampled_points, downsampled_labels, num_points, data_type='train', directory='data/processed/'):
+    This function iterates over point cloud data in chunks, normalizes them, 
+    and collects the chunks with their corresponding labels using a 
+    PointCloudProcessor instance.
+
+    Args:
+    - file_paths (list of str): List of paths to point cloud files.
+    - pc_processor (PointCloudProcessor): An instance of PointCloudProcessor to process point clouds.
+    - chunk_size (int): The size of each chunk to process. Default is 1.
+
+    Returns:
+    - list: A list of processed and normalized point cloud chunks.
+    - list: A list of corresponding labels for the point cloud chunks.
+    """
+    
+    chunks = []
+    labels = []
+
+    for point_cloud_chunk in load_point_clouds_in_chunks(file_paths=file_paths, chunk_size=chunk_size):
+        for normalized_chunk, label in pc_processor.process_point_cloud(np.asarray(point_cloud_chunk)):
+            chunks.append(normalized_chunk)
+            labels.append(label)
+
+    return chunks, labels
+
+def save_downsampled_data(downsampled_points, downsampled_labels, num_points, task='seg', data_type='train', directory='data/processed/'):
     """
     Save downsampled point cloud data and labels to numpy files.
 
@@ -204,11 +232,15 @@ def save_downsampled_data(downsampled_points, downsampled_labels, num_points, da
     if not os.path.exists(directory):
         os.makedirs(directory)
 
-    points_file_path = os.path.join(directory, f'downsampled_points_{num_points}_{data_type}.npy')
-    labels_file_path = os.path.join(directory, f'downsampled_labels_{num_points}_{data_type}.npy')
+    points_file_path = os.path.join(directory, f'downsampled_points_{task}_{num_points}_{data_type}.npy')
+    labels_file_path = os.path.join(directory, f'downsampled_labels_{task}_{num_points}_{data_type}.npy')
 
     np.save(points_file_path, downsampled_points)
     np.save(labels_file_path, downsampled_labels)
 
     print(f'Downsampled data saved as {points_file_path} and {labels_file_path}')
 
+
+def remap_labels(labels, label_mapping):
+    remapped_labels = torch.tensor([label_mapping[label.item()] for label in labels])
+    return remapped_labels
