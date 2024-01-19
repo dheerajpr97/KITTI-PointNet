@@ -6,6 +6,13 @@ This repository hosts the implementation and tools necessary for training and ev
 
 The repository is structured to facilitate the processing of point cloud data, model training and evaluation, and provides utility scripts and Jupyter notebooks for a comprehensive workflow.
 
+## Point Cloud Visualizations
+
+Here are some visualizations of the point clouds:
+
+![Point Cloud Visualization - Ground Truth](./pc_gt.png)
+![Point Cloud Visualization - Predicted](./pc_pred.png)
+
 ## Structure
 
 - `data_3d_semantics/`: Raw semantic 3D data from KITTI.
@@ -13,7 +20,7 @@ The repository is structured to facilitate the processing of point cloud data, m
 - `processed/`: Contains processed data split into training and validation sets.
 - `evaluation/`: Evaluation scripts for classification and segmentation tasks.
 - `models/`: PointNet model definitions and utilities.
-- `notebooks/`: Jupyter notebooks for data analysis, preprocessing, and model implementation.
+<!--- - `notebooks/`: Jupyter notebooks for data analysis, preprocessing, and model implementation.-->
 - `training/`: Training scripts for classification and segmentation.
 - `utils/`: Utilities for file handling and other functions.
 
@@ -89,8 +96,7 @@ Appreciation to the creators of the PointNet architecture and its PyTorch implem
 
 ### To do:
 
-* Add classification scripts 
-* Add mIoU evaluation and inference scripts
-* Add example visualizations
+<!--- * Add mIoU evaluation and inference scripts
+* Add example visualizations --->
 * Add PointNet++ functionality
 * Compare performance of architectures
