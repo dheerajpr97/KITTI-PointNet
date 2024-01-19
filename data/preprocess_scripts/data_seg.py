@@ -29,16 +29,16 @@ def main(args):
 
     # Process point clouds
     print(f'Processing point clouds started...')
-    sampled_points, sampled_labels =  downsample_point_cloud_chunks_seg(file_paths=file_paths[0:1],
+    sampled_points, sampled_labels =  downsample_point_cloud_chunks_seg(file_paths=file_paths,
                                                                      trainid_to_keep=trainid_to_keep, 
-                                                                     chunk_size=1, num_samples=args.num_points)
+                                                                     chunk_size=15, num_samples=args.num_points)
     print(f'Point clouds processed...')
 
     # Save the processed data
     SAVE_DIR = os.path.join('data/processed', args.data_type)
     if not os.path.exists(SAVE_DIR):
         os.makedirs(SAVE_DIR)
-    save_downsampled_data(sampled_points, sampled_labels, args.task, args.num_points, args.data_type, directory=SAVE_DIR)
+    save_downsampled_data(sampled_points, sampled_labels, args.num_points, args.task,  args.data_type, directory=SAVE_DIR)
 
     # Add time taken to run the script
     end_time = time.time()
@@ -57,4 +57,4 @@ if __name__ == '__main__':
     main(args)
 
 # Example usage command:
-# python -m data.preprocess_scripts.data_seg --task seg --data_type train --num_points 512 --train_file_path data/filepaths_train.txt --val_file_path data/filepaths_val.txt --filtered_labels_path data/filtered_labels.csv
+# python -m data.preprocess_scripts.data_seg --task seg --data_type train --num_points 1024 --train_file_path data/filepaths_train.txt --val_file_path data/filepaths_val.txt --filtered_labels_path data/filtered_labels.csv

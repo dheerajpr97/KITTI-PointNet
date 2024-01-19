@@ -171,7 +171,7 @@ class PointNetCls(nn.Module):
         x = F.log_softmax(x, dim=1)
         return x, trans_feat
 
-def pointnet_loss(outputs, labels, transform, class_weights, device, reg_weight=0.001, ):
+def pointnet_loss(outputs, labels, transform, class_weights, device, reg_weight=0.001):
     """
     Calculate the PointNet loss given the predicted outputs, ground truth labels, transformation matrix, class weights, and regularization weight.
 

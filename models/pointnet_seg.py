@@ -47,7 +47,7 @@ class PointNetSeg(nn.Module):
         x = x.view(batchsize, n_pts, self.k)
         return x, trans_feat
     
-def pointnet_loss(outputs, labels, transform, device, reg_weight=0.001):
+def pointnet_loss(outputs, labels, transform, class_weights, device, reg_weight=0.001):
     """
         Calculates the PointNet loss function.
 
@@ -61,8 +61,10 @@ def pointnet_loss(outputs, labels, transform, device, reg_weight=0.001):
             torch.Tensor: The total loss calculated as the sum of the classification loss and the regularization loss.
     """
 
-    outputs = outputs.view(-1, 15)  # Reshape to [64*128, 15]    
-    classify_loss = F.nll_loss(outputs, labels) 
+    outputs = outputs.view(-1, 15)    
+    
+    #classify_loss = nn.NLLLoss(weight=class_weights)(outputs, labels)
+    classify_loss = F.nll_loss(outputs, labels, weight=class_weights) 
 
     # Compute the transformation regularization term
      

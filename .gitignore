@@ -160,3 +160,5 @@ cython_debug/
 #.idea/
 
 data/data_3d_semantics/*
+data/processed/*
+notebooks/*

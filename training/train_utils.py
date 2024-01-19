@@ -49,8 +49,6 @@ def calculate_accuracy_cls(outputs, labels):
     total = labels.size(0)
     return correct, total
 
-
-
 def calculate_class_weights(labels):
     # Calculate class distribution
     unique, counts = np.unique(labels, return_counts=True)
@@ -62,3 +60,11 @@ def calculate_class_weights(labels):
     class_weights_dict = {cls: weight for cls, weight in zip(classes, class_weights)}
 
     return class_weights_dict
+
+# def calculate_class_weights(labels, num_classes):
+#     class_weights = np.zeros(num_classes)
+
+#     for i in range(num_classes):
+#         class_weights[i] = 1 / np.log(1.02 + np.sum(labels == i) / np.sum(labels != i))
+
+#     return class_weights

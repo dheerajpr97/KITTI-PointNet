@@ -16,10 +16,11 @@ def normalize_point_cloud(points):
     Returns:
         np.ndarray: Normalized point cloud.
     """
+    epsilon = 1e-6
     centroid = np.mean(points, axis=0)
     points -= centroid
     furthest_distance = np.max(np.sqrt(np.sum(points ** 2, axis=1)))
-    points /= furthest_distance
+    points /= (furthest_distance + epsilon)
     return points
 
 def filter_point_cloud(point_cloud, trainid_to_keep):
@@ -175,6 +176,7 @@ def downsample_point_cloud_chunks_seg(file_paths, trainid_to_keep, chunk_size=1,
         tuple: Lists of downsampled points and labels.
     """
     downsampled_points, downsampled_labels = [], []
+    point_cloud_counter = 0  # Initialize the counter
 
     for point_cloud_chunk in load_point_clouds_in_chunks(file_paths=file_paths, chunk_size=chunk_size):
         for point_cloud in point_cloud_chunk:
@@ -183,6 +185,8 @@ def downsample_point_cloud_chunks_seg(file_paths, trainid_to_keep, chunk_size=1,
             
             for point_array in point_arrays:
                 sampled_points, sampled_labels = approximate_fps(point_array[:, :3], point_array[:, 3], num_samples=num_samples)
+                point_cloud_counter += 1  # Increment the counter
+                print(f'Processed {point_cloud_counter} point clouds')
                 downsampled_points.append(sampled_points)
                 downsampled_labels.append(sampled_labels)
 

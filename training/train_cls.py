@@ -145,10 +145,11 @@ def main(args):
     
     # Current timestamp
     timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    args.save_model_path = args.save_model_path + timestamp + '.pt'
+    args.save_model_path = args.save_model_path + '_' +args.task + '_' + timestamp + '.pt'
 
     # Save the trained model
     torch.save(trained_model.state_dict(), args.save_model_path)
+    print("Model saved to ", args.save_model_path)
 
 if __name__ == "__main__":
     import argparse
@@ -164,7 +165,7 @@ if __name__ == "__main__":
     parser.add_argument('--epochs', type=int, default=1000, help='Number of epochs to train')
     parser.add_argument('--reg_weight', type=float, default=0.01, help='Regularization weight')
     parser.add_argument('--early_stopping_patience', type=int, default=250, help='Early stopping patience')
-    parser.add_argument('--save_model_path', type=str, default='models/trained_models/trained_model_{args.task}_', help='Path to save the trained model')
+    parser.add_argument('--save_model_path', type=str, default='models/trained_models/trained_model', help='Path to save the trained model')
 
     args = parser.parse_args()
     main(args)
