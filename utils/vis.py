@@ -84,7 +84,7 @@ def create_point_cloud_dataframe(filtered_point_cloud, filtered_labels):
     data_dataframe['color'] = data_dataframe['color'].apply(convert_color_string_to_tuple)
     return data_dataframe
 
-def prepare_point_cloud_data(data_dataframe):
+def prepare_data_vis(data_dataframe, color_type='Predicted'):
     """
     Prepare point cloud data for visualization.
 
@@ -96,10 +96,10 @@ def prepare_point_cloud_data(data_dataframe):
         numpy.ndarray: The colors array.
     """
     points = np.vstack((data_dataframe['x'], data_dataframe['y'], data_dataframe['z'])).T 
-    colors = np.array(data_dataframe['color'].apply(normalize_color).tolist())
+    colors = np.array(data_dataframe[color_type].apply(normalize_color).tolist())
     return points, colors
 
-def visualize_point_cloud(points, colors):
+def visualize_point_cloud(points, colors, window_name='Point Cloud', save_path=None):
     """
     Visualize a point cloud using Open3D.
 
@@ -110,4 +110,18 @@ def visualize_point_cloud(points, colors):
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(points)
     pcd.colors = o3d.utility.Vector3dVector(colors)
-    o3d.visualization.draw_geometries([pcd])
+    
+
+    # Save point cloud visualization
+        # Visualize the point cloud
+    vis = o3d.visualization.Visualizer()
+    vis.create_window(window_name=window_name)
+    vis.add_geometry(pcd)
+    vis.run()  # This will block the execution until the window is closed
+    
+    # Save the visualization if a save path is provided
+    if save_path is not None:
+        vis.capture_screen_image(save_path)
+        print(f"Saved point cloud visualization to {save_path}")
+    
+    vis.destroy_window()

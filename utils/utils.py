@@ -248,3 +248,23 @@ def save_downsampled_data(downsampled_points, downsampled_labels, num_points, ta
 def remap_labels(labels, label_mapping):
     remapped_labels = torch.tensor([label_mapping[label.item()] for label in labels])
     return remapped_labels
+
+def convert_color_string_to_tuple(color_string):
+    """
+    Convert a color string to a tuple.
+
+    Args:
+        color_string (str): The color string.
+
+    Returns:
+        tuple: The color tuple.
+    """
+    try:
+        if pd.isnull(color_string):
+            return None
+        stripped_string = color_string.strip('()')
+        tuple_values = tuple(map(int, stripped_string.split(',')))
+        return tuple_values
+    except Exception as e:
+        print(f"Error converting color: {e}")
+        return None

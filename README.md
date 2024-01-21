@@ -8,10 +8,17 @@ The repository is structured to facilitate the processing of point cloud data, m
 
 ## Point Cloud Visualizations
 
-Here are some visualizations of the point clouds:
-
-![Point Cloud Visualization - Ground Truth](./pc_gt.png)
-![Point Cloud Visualization - Predicted](./pc_pred.png)
+<table>
+<tr>
+<th>Point Cloud Visualization - Ground Truth</th>
+<th>Point Cloud Visualization - Predicted</th>
+</tr>
+<tr>
+<td><img src="./pc_gt.png" alt="Point Cloud Visualization - Ground Truth" /></td>
+<td><img src="./pc_pred.png" alt="Point Cloud Visualization - Predicted" /></td>
+</tr>
+</table>
+"""
 
 ## Structure
 
@@ -67,9 +74,6 @@ python evaluation/evaluate_seg.py
 ### License
 This project is under the MIT License. See the LICENSE file for more information.
 
-### Contributions
-Contributions are welcome. Please open an issue to discuss your ideas or submit a pull request.
-
 ### Acknowledgements
 Thanks to the KITTI-360 Dataset Providers.
 
@@ -93,6 +97,9 @@ Appreciation to the creators of the PointNet architecture and its PyTorch implem
           Journal = {https://github.com/yanx27/Pointnet_Pointnet2_pytorch},
           Year = {2019}
     }
+
+### Contributions
+Contributions are welcome. Please open an issue to discuss your ideas or submit a pull request.
 
 ### To do:
 
